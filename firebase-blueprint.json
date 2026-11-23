@@ -1,0 +1,256 @@
+{
+  "entities": {
+    "CalendarEntry": {
+      "title": "CalendarEntry",
+      "description": "Public non-PII availability marker for a specific date on the Salão Boa Vista calendar.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "ISO calendar date in YYYY-MM-DD format.",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "status": {
+          "type": "string",
+          "description": "Public day availability state.",
+          "enum": ["reserved", "blocked"]
+        },
+        "publicNote": {
+          "type": "string",
+          "description": "Optional non-PII public label or maintenance note shown for the day.",
+          "maxLength": 160
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the latest update."
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "UID of the owner/admin who updated the entry.",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": ["date", "status", "publicNote", "updatedAt", "updatedBy"]
+    },
+    "Reservation": {
+      "title": "Reservation",
+      "description": "Owner-only detailed reservation or manual date block record including client details and editable descriptions.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "ISO calendar date in YYYY-MM-DD format.",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "type": {
+          "type": "string",
+          "description": "Whether the date is a client reservation or a manual owner block.",
+          "enum": ["reservation", "blocked"]
+        },
+        "title": {
+          "type": "string",
+          "description": "Event title or block reason summary.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed editable description for the reservation or block.",
+          "maxLength": 1000
+        },
+        "clientName": {
+          "type": "string",
+          "description": "Client full name for reservations (empty for manual blocks).",
+          "maxLength": 120
+        },
+        "clientPhone": {
+          "type": "string",
+          "description": "Client WhatsApp or phone number (PII, owner-only).",
+          "maxLength": 40
+        },
+        "guestCount": {
+          "type": "integer",
+          "description": "Estimated number of guests."
+        },
+        "startTime": {
+          "type": "string",
+          "description": "Event start time in HH:MM format.",
+          "minLength": 5,
+          "maxLength": 5,
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "endTime": {
+          "type": "string",
+          "description": "Event end time in HH:MM format.",
+          "minLength": 5,
+          "maxLength": 5,
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "totalValue": {
+          "type": "string",
+          "description": "Formatted rental value or price notes.",
+          "maxLength": 40
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "Payment tracking status.",
+          "enum": ["none", "pending", "deposit", "paid"]
+        },
+        "ownerUid": {
+          "type": "string",
+          "description": "UID of the owner/admin who created the record.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when last updated."
+        }
+      },
+      "required": [
+        "date",
+        "type",
+        "title",
+        "description",
+        "clientName",
+        "clientPhone",
+        "guestCount",
+        "startTime",
+        "endTime",
+        "totalValue",
+        "paymentStatus",
+        "ownerUid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "VenueProfile": {
+      "title": "VenueProfile",
+      "description": "Public editable descriptions, amenities, rules, and contact information for Salão Boa Vista.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Venue display name.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "tagline": {
+          "type": "string",
+          "description": "Short subtitle describing the venue.",
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "description": "Main editable description of Salão Boa Vista.",
+          "maxLength": 2000
+        },
+        "amenitiesDescription": {
+          "type": "string",
+          "description": "Editable description of pool, waterfall, barbecue area, and facilities.",
+          "maxLength": 1500
+        },
+        "rulesDescription": {
+          "type": "string",
+          "description": "Editable rules, schedule, and booking policy.",
+          "maxLength": 1500
+        },
+        "capacity": {
+          "type": "string",
+          "description": "Venue capacity description.",
+          "maxLength": 80
+        },
+        "defaultHours": {
+          "type": "string",
+          "description": "Standard rental hours.",
+          "maxLength": 80
+        },
+        "contactPhone": {
+          "type": "string",
+          "description": "Public WhatsApp/phone for booking inquiries.",
+          "maxLength": 40
+        },
+        "location": {
+          "type": "string",
+          "description": "Venue neighborhood or address description.",
+          "maxLength": 200
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the latest profile update."
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "UID of the owner/admin who updated the profile.",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "name",
+        "tagline",
+        "description",
+        "amenitiesDescription",
+        "rulesDescription",
+        "capacity",
+        "defaultHours",
+        "contactPhone",
+        "location",
+        "updatedAt",
+        "updatedBy"
+      ]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized owner/administrator record.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "enum": ["owner", "admin"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["email", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/availability/{dateId}": {
+      "schema": { "$ref": "#/entities/CalendarEntry" },
+      "description": "Public calendar availability status (reserved or blocked) keyed by YYYY-MM-DD."
+    },
+    "/reservations/{dateId}": {
+      "schema": { "$ref": "#/entities/Reservation" },
+      "description": "Owner-only reservation and block details keyed by YYYY-MM-DD."
+    },
+    "/venue/{profileId}": {
+      "schema": { "$ref": "#/entities/VenueProfile" },
+      "description": "Public venue profile and editable descriptions for Salão Boa Vista."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Authorized administrator registry."
+    }
+  }
+}

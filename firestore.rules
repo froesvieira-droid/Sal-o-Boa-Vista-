@@ -1,0 +1,195 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Hardened Global Helpers
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidDateId(dateId) {
+      return dateId is string && dateId.size() == 10 && dateId.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+
+    function isValidTimeStr(t) {
+      return t is string && t.size() == 5 && t.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$');
+    }
+
+    function matchesActor(actorId) {
+      return actorId is string
+        && actorId.size() >= 1
+        && actorId.size() <= 128
+        && (isSignedIn() ? actorId == request.auth.uid : actorId == 'owner');
+    }
+
+    // 3. Entity Validation Blueprints
+    function isValidCalendarEntry(data, dateId) {
+      return data.keys().hasAll(['date', 'status', 'publicNote', 'updatedAt', 'updatedBy'])
+        && data.keys().hasOnly(['date', 'status', 'publicNote', 'updatedAt', 'updatedBy'])
+        && data.date == dateId
+        && isValidDateId(data.date)
+        && data.status in ['reserved', 'blocked']
+        && data.publicNote is string
+        && data.publicNote.size() <= 160
+        && data.updatedAt == request.time
+        && matchesActor(data.updatedBy);
+    }
+
+    function isValidReservation(data, dateId) {
+      return data.keys().hasAll([
+          'date', 'type', 'title', 'description', 'clientName', 'clientPhone',
+          'guestCount', 'startTime', 'endTime', 'totalValue', 'paymentStatus',
+          'ownerUid', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'date', 'type', 'title', 'description', 'clientName', 'clientPhone',
+          'guestCount', 'startTime', 'endTime', 'totalValue', 'paymentStatus',
+          'ownerUid', 'createdAt', 'updatedAt'
+        ])
+        && data.date == dateId
+        && isValidDateId(data.date)
+        && data.type in ['reservation', 'blocked']
+        && data.title is string
+        && data.title.size() >= 1
+        && data.title.size() <= 120
+        && data.description is string
+        && data.description.size() <= 1000
+        && data.clientName is string
+        && data.clientName.size() <= 120
+        && data.clientPhone is string
+        && data.clientPhone.size() <= 40
+        && data.guestCount is int
+        && data.guestCount >= 0
+        && data.guestCount <= 500
+        && isValidTimeStr(data.startTime)
+        && isValidTimeStr(data.endTime)
+        && data.totalValue is string
+        && data.totalValue.size() <= 40
+        && data.paymentStatus in ['none', 'pending', 'deposit', 'paid']
+        && data.ownerUid is string
+        && data.ownerUid.size() >= 1
+        && data.ownerUid.size() <= 128
+        && data.createdAt is timestamp
+        && data.updatedAt == request.time;
+    }
+
+    function isValidVenueProfile(data) {
+      return data.keys().hasAll([
+          'name', 'tagline', 'description', 'amenitiesDescription',
+          'rulesDescription', 'capacity', 'defaultHours', 'contactPhone',
+          'location', 'updatedAt', 'updatedBy'
+        ])
+        && data.keys().hasOnly([
+          'name', 'tagline', 'description', 'amenitiesDescription',
+          'rulesDescription', 'capacity', 'defaultHours', 'contactPhone',
+          'location', 'updatedAt', 'updatedBy'
+        ])
+        && data.name is string
+        && data.name.size() >= 1
+        && data.name.size() <= 100
+        && data.tagline is string
+        && data.tagline.size() <= 200
+        && data.description is string
+        && data.description.size() <= 2000
+        && data.amenitiesDescription is string
+        && data.amenitiesDescription.size() <= 1500
+        && data.rulesDescription is string
+        && data.rulesDescription.size() <= 1500
+        && data.capacity is string
+        && data.capacity.size() <= 80
+        && data.defaultHours is string
+        && data.defaultHours.size() <= 80
+        && data.contactPhone is string
+        && data.contactPhone.size() <= 40
+        && data.location is string
+        && data.location.size() <= 200
+        && data.updatedAt == request.time
+        && matchesActor(data.updatedBy);
+    }
+
+    // 4. Collection Rules (Direct management without login required, strict schema & atomic sync enforced)
+
+    match /availability/{dateId} {
+      allow get: if isValidDateId(dateId) && (resource == null || resource.data.status in ['reserved', 'blocked']);
+      allow list: if resource.data.status in ['reserved', 'blocked'];
+
+      allow create: if isValidDateId(dateId)
+        && isValidCalendarEntry(incoming(), dateId)
+        && getAfter(/databases/$(database)/documents/reservations/$(dateId)).data.date == dateId;
+
+      allow update: if isValidDateId(dateId)
+        && isValidCalendarEntry(incoming(), dateId)
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'publicNote', 'updatedAt', 'updatedBy'])
+        && getAfter(/databases/$(database)/documents/reservations/$(dateId)).data.date == dateId;
+
+      allow delete: if isValidDateId(dateId);
+    }
+
+    match /reservations/{dateId} {
+      allow get: if isValidDateId(dateId) && (resource == null || resource.data.type in ['reservation', 'blocked']);
+      allow list: if resource.data.type in ['reservation', 'blocked'];
+
+      allow create: if isValidDateId(dateId)
+        && isValidReservation(incoming(), dateId)
+        && matchesActor(incoming().ownerUid)
+        && incoming().createdAt == request.time
+        && getAfter(/databases/$(database)/documents/availability/$(dateId)).data.date == dateId
+        && getAfter(/databases/$(database)/documents/availability/$(dateId)).data.status == (incoming().type == 'reservation' ? 'reserved' : 'blocked');
+
+      allow update: if isValidDateId(dateId)
+        && isValidReservation(incoming(), dateId)
+        && incoming().ownerUid == existing().ownerUid
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'type', 'title', 'description', 'clientName', 'clientPhone',
+          'guestCount', 'startTime', 'endTime', 'totalValue', 'paymentStatus', 'updatedAt'
+        ])
+        && getAfter(/databases/$(database)/documents/availability/$(dateId)).data.date == dateId
+        && getAfter(/databases/$(database)/documents/availability/$(dateId)).data.status == (incoming().type == 'reservation' ? 'reserved' : 'blocked');
+
+      allow delete: if isValidDateId(dateId);
+    }
+
+    match /venue/{profileId} {
+      allow get: if isValidId(profileId) && (resource == null || resource.data.name is string);
+      allow list: if false;
+
+      allow create: if isValidId(profileId)
+        && profileId == 'boa-vista'
+        && isValidVenueProfile(incoming());
+
+      allow update: if isValidId(profileId)
+        && profileId == 'boa-vista'
+        && isValidVenueProfile(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'tagline', 'description', 'amenitiesDescription',
+          'rulesDescription', 'capacity', 'defaultHours', 'contactPhone',
+          'location', 'updatedAt', 'updatedBy'
+        ]);
+
+      allow delete: if false;
+    }
+
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId) && request.auth.uid == adminId;
+      allow list, create, update, delete: if false;
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Salão Boa Vista",
+  "description": "Aplicativo de agendamento, reservas e controle de disponibilidade do Salão Boa Vista.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
