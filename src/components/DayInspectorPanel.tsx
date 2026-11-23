@@ -265,7 +265,7 @@ export function DayInspectorPanel({
             {dayStatus === 'free' && (
               <div className="space-y-4">
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  Esta data está livre no calendário do Salão Boa Vista e disponível para agendamento.
+                  Esta data está livre no calendário do Espaço Boa Vista e disponível para agendamento.
                 </p>
 
                 <div className="flex flex-col gap-2.5 pt-2">

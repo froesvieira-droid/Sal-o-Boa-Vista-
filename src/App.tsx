@@ -180,7 +180,7 @@ function BoaVistaApp() {
 
       <footer className="bg-white border-t border-slate-200 py-6">
         <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <span>Salão Boa Vista · Agenda Oficial de Disponibilidade</span>
+          <span>Espaço Boa Vista · Agenda Oficial de Disponibilidade</span>
           <span>Controle de reservas, bloqueios e descrições</span>
         </div>
       </footer>

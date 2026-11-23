@@ -77,10 +77,10 @@ export interface VenueProfile {
 }
 
 export const DEFAULT_VENUE_PROFILE: VenueProfile = {
-  name: 'Salão Boa Vista',
+  name: 'Espaço Boa Vista',
   tagline: 'Salão de festas completo com piscina, cascata e área de lazer',
   description:
-    'O Salão Boa Vista oferece um ambiente amplo, aconchegante e preparado para receber aniversários, confraternizações, eventos familiares e celebrações especiais durante todo o ano.',
+    'O Espaço Boa Vista oferece um ambiente amplo, aconchegante e preparado para receber aniversários, confraternizações, eventos familiares e celebrações especiais durante todo o ano.',
   amenitiesDescription:
     'Piscina ampla com cascata e área infantil, espaço gourmet coberto com churrasqueira, cozinha equipada com freezer e fogão, mesas, cadeiras e área verde ao ar livre.',
   rulesDescription:

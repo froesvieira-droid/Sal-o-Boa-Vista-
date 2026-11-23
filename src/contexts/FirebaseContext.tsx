@@ -105,9 +105,12 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data() as VenueProfile;
+          const normalizedName =
+            data.name === 'Salão Boa Vista' ? 'Espaço Boa Vista' : data.name;
           setVenueProfile({
             ...DEFAULT_VENUE_PROFILE,
             ...data,
+            name: normalizedName || DEFAULT_VENUE_PROFILE.name,
           });
         } else {
           setVenueProfile(DEFAULT_VENUE_PROFILE);

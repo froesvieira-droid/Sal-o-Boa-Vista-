@@ -21,12 +21,12 @@ export function Header({ onNavigateSection, onOpenNewReservation }: HeaderProps)
         >
           <img
             src={LOGO_PATH}
-            alt="Logo Salão Boa Vista"
+            alt="Logo Espaço Boa Vista"
             referrerPolicy="no-referrer"
             className="w-10 h-10 rounded-full object-cover border border-amber-300/80 bg-sky-50 shrink-0"
           />
           <span className="font-display text-lg font-bold tracking-tight text-slate-900 group-hover:text-sky-800 transition-colors">
-            Salão Boa Vista
+            Espaço Boa Vista
           </span>
         </a>
 
@@ -53,7 +53,7 @@ export function Header({ onNavigateSection, onOpenNewReservation }: HeaderProps)
             }}
             className="hover:text-slate-900 hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0"
           >
-            Sobre o Salão
+            Sobre o Espaço
           </a>
           <a
             href="#comodidades"

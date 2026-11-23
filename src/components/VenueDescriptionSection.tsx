@@ -26,7 +26,7 @@ export function VenueDescriptionSection() {
     try {
       await saveVenueProfile(form);
       setEditing(false);
-      setSaveFeedback('Descrições do Salão Boa Vista atualizadas com sucesso.');
+      setSaveFeedback('Descrições do Espaço Boa Vista atualizadas com sucesso.');
     } catch (error) {
       setErrorMsg(
         error instanceof Error ? error.message : 'Não foi possível salvar as descrições.',
@@ -64,7 +64,7 @@ export function VenueDescriptionSection() {
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               <FileEdit className="w-4 h-4" />
-              <span>Editar Descrições do Salão</span>
+              <span>Editar Descrições do Espaço</span>
             </button>
           )}
         </div>
@@ -167,7 +167,7 @@ export function VenueDescriptionSection() {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-xs font-medium text-slate-700">
-                  Descrição principal do salão
+                  Descrição principal do espaço
                 </label>
                 <span className="text-[11px] font-mono text-slate-400 tabular-nums">
                   {form.description.length}/{BLUEPRINT_LIMITS.VENUE_DESCRIPTION_MAX}
